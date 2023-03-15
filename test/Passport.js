@@ -90,4 +90,24 @@ describe("Visa", function () {
       await expect(validity).to.equal(true);
     });
   });
+  describe("Cancel", () => {
+    it("Visa will be unvalid if the visa got canceled", async () => {
+      const visaDuration = 60 * 60 * 24 * 30;
+      const [owner, user1] = await ethers.getSigners();
+      await visa.safeMint(user1.address, 60 * 60 * 24 * 7, visaDuration);
+      await network.provider.send("evm_increaseTime", [60 * 60 * 24 * 7 + 1]);
+      await network.provider.send("evm_mine");
+      await visa.cancelVisa(1);
+      let validity = await visa.isValid(1);
+      await expect(validity).to.equal(false);
+    });
+    it("Will revert if someone but the owner tries to cancel", async () => {
+      const visaDuration = 60 * 60 * 24 * 30;
+      const [owner, user1] = await ethers.getSigners();
+      await visa.safeMint(user1.address, 60 * 60 * 24 * 7, visaDuration);
+      await expect(visa.connect(user1).cancelVisa(1)).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
+    });
+  });
 });

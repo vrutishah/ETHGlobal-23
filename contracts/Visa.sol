@@ -14,6 +14,7 @@ contract Visa is ERC721URIStorage, Ownable {
     struct VisaData {
         uint fromDate;
         uint endDate;
+        bool isApproved;
     }
 
     // NFT variables
@@ -38,14 +39,19 @@ contract Visa is ERC721URIStorage, Ownable {
         _safeMint(to, tokenId);
         uint fromDate = (block.timestamp + timeToStartDate);
         uint endDate = (fromDate + duration);
-        validity[tokenId] = VisaData(fromDate, endDate);
+        validity[tokenId] = VisaData(fromDate, endDate, true);
         emit VisaMinted(to, tokenId, fromDate, endDate);
+    }
+
+    function cancelVisa(uint tokenId) external onlyOwner {
+        validity[tokenId].isApproved = false;
     }
 
     function isValid(uint tokenId) public view returns (bool) {
         if (
             validity[tokenId].fromDate <= block.timestamp &&
-            validity[tokenId].endDate >= block.timestamp
+            validity[tokenId].endDate >= block.timestamp &&
+            validity[tokenId].isApproved
         ) {
             return true;
         }
