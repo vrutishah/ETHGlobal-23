@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 // Uncomment this line to use console.log
@@ -8,16 +8,22 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Passport is ERC721URIStorage, Ownable {
+    // Type declarations
     using Counters for Counters.Counter;
 
     Counters.Counter private passportNumber;
 
+    /* Events */
+    event PassportMinted(address holder, uint tokenId);
+
+    /* Functions */
     constructor() ERC721("Passport", "PSP") {}
 
     function safeMint(address to) public onlyOwner {
         passportNumber.increment();
         uint256 tokenId = passportNumber.current();
         _safeMint(to, tokenId);
+        emit PassportMinted(to, tokenId);
     }
 
     function burn(uint256 tokenId) external {
