@@ -19,10 +19,12 @@ contract Passport is ERC721URIStorage, Ownable {
     /* Functions */
     constructor() ERC721("Passport", "PSP") {}
 
-    function safeMint(address to) public onlyOwner {
+    function safeMint(address to, string memory tokenUri) public onlyOwner {
         passportNumber.increment();
         uint256 tokenId = passportNumber.current();
+
         _safeMint(to, tokenId);
+        _setTokenURI(tokenId, tokenUri);
         emit PassportMinted(to, tokenId);
     }
 

@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Visa is ERC721URIStorage, Ownable {
     // Type declarations
+    string public country = "Cryponya";
+    string public visaName = "Visitor Visa";
 
     using Counters for Counters.Counter;
 
