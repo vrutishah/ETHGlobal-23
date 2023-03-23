@@ -4,7 +4,8 @@ const {
   storeImages,
 } = require("../utils/uploadToPinata");
 
-const imageLocation = "./image";
+const visaDuration = "60*60*24*21";
+const imageLocation = "./imageVisa";
 
 const metadataTemplate = {
   name: "",
@@ -24,8 +25,8 @@ const main = async () => {
   }
   const user = "0x7e6e41BA05FdBE4e1617cfB521154550537255df";
   const contract = await ethers.getContractAt(
-    "Passport",
-    "0x8BB632706b987CdEa29d7843686117f3784F4054"
+    "Visa",
+    "0xB02BDfA084513956DAAdeC50820242EEdA6B917d"
   );
   await contract.safeMint(user, tokenUri);
   console.log("Nft got minted");
@@ -41,7 +42,7 @@ const handleTokenUris = async () => {
   for (imageUploadResponseIndex in imageUploadResponses) {
     let tokenUriMetadata = { ...metadataTemplate };
     tokenUriMetadata.name = files[imageUploadResponseIndex].replace(".png", "");
-    tokenUriMetadata.description = `Passport of ${tokenUriMetadata.name}!`;
+    tokenUriMetadata.description = `Cryptonia Visa of ${tokenUriMetadata.name}!`;
     tokenUriMetadata.image = `ipfs://${imageUploadResponses[imageUploadResponseIndex].IpfsHash}`;
     console.log(`Uploading ${tokenUriMetadata.name}...`);
     const metadataUploadResponse = await storeTokenUriMetadata(

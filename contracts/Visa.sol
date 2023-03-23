@@ -14,8 +14,9 @@ contract Visa is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
     struct VisaData {
+        address holder;
         uint fromDate;
-        uint endDate;
+        uint expireDate;
         bool isApproved;
     }
 
@@ -26,7 +27,19 @@ contract Visa is ERC721URIStorage, Ownable {
     mapping(uint => VisaData) public validity;
 
     /* Events */
-    event VisaMinted(address holder, uint tokenId, uint fromDate, uint endDate);
+    event VisaMinted(
+        address holder,
+        uint tokenId,
+        uint fromDate,
+        uint endDate,
+        string tokenURI
+    );
+    event VisaCancelled(
+        address holder,
+        uint tokenId,
+        uint fromDate,
+        uint endDate
+    );
 
     /* Functions */
     constructor() ERC721("Visa", "VSA") {}
@@ -34,29 +47,49 @@ contract Visa is ERC721URIStorage, Ownable {
     function safeMint(
         address to,
         uint timeToStartDate,
-        uint duration
+        uint duration,
+        string memory tokenUri
     ) public onlyOwner {
         passportNumber.increment();
         uint256 tokenId = passportNumber.current();
         _safeMint(to, tokenId);
         uint fromDate = (block.timestamp + timeToStartDate);
         uint endDate = (fromDate + duration);
-        validity[tokenId] = VisaData(fromDate, endDate, true);
-        emit VisaMinted(to, tokenId, fromDate, endDate);
+        validity[tokenId] = VisaData(to, fromDate, endDate, true);
+        _setTokenURI(tokenId, tokenUri);
+        emit VisaMinted(to, tokenId, fromDate, endDate, tokenUri);
     }
 
     function cancelVisa(uint tokenId) external onlyOwner {
         validity[tokenId].isApproved = false;
+        emit VisaCancelled(
+            validity[tokenId].holder,
+            tokenId,
+            validity[tokenId].fromDate,
+            validity[tokenId].expireDate
+        );
     }
 
     function isValid(uint tokenId) public view returns (bool) {
         if (
             validity[tokenId].fromDate <= block.timestamp &&
-            validity[tokenId].endDate >= block.timestamp &&
+            validity[tokenId].expireDate >= block.timestamp &&
             validity[tokenId].isApproved
         ) {
             return true;
         }
         return false;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal pure override {
+        require(
+            from == address(0) || to == address(0),
+            "This is your passport. It can't be transferred. It can only be burned by the owner."
+        );
     }
 }

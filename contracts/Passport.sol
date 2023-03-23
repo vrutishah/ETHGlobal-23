@@ -13,19 +13,32 @@ contract Passport is ERC721URIStorage, Ownable {
 
     Counters.Counter private passportNumber;
 
+    struct PassportData {
+        uint issueDate;
+        uint expireDate;
+    }
+
+    mapping(uint => PassportData) public validity;
+    mapping(address => uint) public passportToUser;
+
     /* Events */
-    event PassportMinted(address holder, uint tokenId);
+    event PassportMinted(address holder, uint tokenId, string tokenURI);
 
     /* Functions */
     constructor() ERC721("Passport", "PSP") {}
 
     function safeMint(address to, string memory tokenUri) public onlyOwner {
+        if (passportToUser[to] > 0) {
+            _burn(passportToUser[to]);
+        }
         passportNumber.increment();
         uint256 tokenId = passportNumber.current();
-
         _safeMint(to, tokenId);
+        passportToUser[to] = tokenId;
+        validity[tokenId].issueDate = block.timestamp;
+        validity[tokenId].expireDate = block.timestamp + (365 days * 10);
         _setTokenURI(tokenId, tokenUri);
-        emit PassportMinted(to, tokenId);
+        emit PassportMinted(to, tokenId, tokenUri);
     }
 
     function burn(uint256 tokenId) external {
@@ -34,6 +47,16 @@ contract Passport is ERC721URIStorage, Ownable {
             "Only the holder can burn the passport"
         );
         _burn(tokenId);
+    }
+
+    function isValid(uint tokenId) public view returns (bool) {
+        if (
+            validity[tokenId].expireDate >= block.timestamp &&
+            validity[tokenId].issueDate <= block.timestamp
+        ) {
+            return true;
+        }
+        return false;
     }
 
     function _beforeTokenTransfer(
@@ -50,5 +73,13 @@ contract Passport is ERC721URIStorage, Ownable {
 
     function _burn(uint256 tokenId) internal override(ERC721URIStorage) {
         super._burn(tokenId);
+    }
+
+    function getExpireDate(uint256 tokenId) public view returns (uint) {
+        return validity[tokenId].issueDate;
+    }
+
+    function getIssueDate(uint256 tokenId) public view returns (uint) {
+        return validity[tokenId].expireDate;
     }
 }

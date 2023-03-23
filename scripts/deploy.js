@@ -1,11 +1,11 @@
 const { ethers } = require("hardhat");
 
 const main = async () => {
-  const Passport = await ethers.getContractFactory("Passport");
+  /*   const Passport = await ethers.getContractFactory("Passport");
   const passport = await Passport.deploy();
   await passport.deployed();
 
-  console.log("Passport deployed at: ", passport.address);
+  console.log("Passport deployed at: ", passport.address); */
 
   const Visa = await ethers.getContractFactory("Visa");
   const visa = await Visa.deploy();
@@ -14,8 +14,8 @@ const main = async () => {
   console.log("Visa deployed at :", visa.address);
 };
 
-//Passport deployed at:  0x8BB632706b987CdEa29d7843686117f3784F4054
-//Visa deployed at : 0x94eD87A30531E523A44153Dd43169C35FfB90c1A
+//Passport deployed at:  0x5df89f7727e663842b5f4582776BAfb62686955c
+//Visa deployed at : 0xB02BDfA084513956DAAdeC50820242EEdA6B917d
 
 main()
   .then(() => process.exit(0))
